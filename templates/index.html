@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MKV to MP4 Converter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔄 MKV to MP4 Converter</h1>
+            <p>Konversi file video MKV ke format MP4 dengan mudah</p>
+        </header>
+
+        <div class="upload-section">
+            <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+                <div class="file-input-container">
+                    <input type="file" id="fileInput" name="file" accept=".mkv" required>
+                    <label for="fileInput" class="file-label">
+                        <span class="file-icon">📁</span>
+                        <span class="file-text">Pilih File MKV</span>
+                    </label>
+                </div>
+
+                <div class="quality-section">
+                    <h3>Kualitas Output:</h3>
+                    <div class="quality-options">
+                        <label class="quality-option">
+                            <input type="radio" name="quality" value="low" checked>
+                            <span class="radio-custom"></span>
+                            Rendah (File kecil, kualitas lebih rendah)
+                        </label>
+                        <label class="quality-option">
+                            <input type="radio" name="quality" value="medium">
+                            <span class="radio-custom"></span>
+                            Medium (Rekomendasi)
+                        </label>
+                        <label class="quality-option">
+                            <input type="radio" name="quality" value="high">
+                            <span class="radio-custom"></span>
+                            Tinggi (File besar, kualitas tinggi)
+                        </label>
+                        <label class="quality-option">
+                            <input type="radio" name="quality" value="veryhigh">
+                            <span class="radio-custom"></span>
+                            Sangat Tinggi (File sangat besar, kualitas terbaik)
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="convert-btn" id="convertBtn">
+                    🎬 Mulai Konversi
+                </button>
+            </form>
+        </div>
+
+        <div class="info-section">
+            <h3>📋 Informasi:</h3>
+            <ul>
+                <li>Maksimal ukuran file: 2GB</li>
+                <li>Format input: MKV</li>
+                <li>Format output: MP4 (H.264 + AAC)</li>
+                <li>Proses konversi mungkin memakan waktu beberapa menit</li>
+                <li>File input akan dihapus setelah konversi berhasil</li>
+            </ul>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <script>
+        // Update file input label dengan nama file
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'Pilih File MKV';
+            document.querySelector('.file-text').textContent = fileName;
+        });
+
+        // Validasi form
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput.files[0]) {
+                e.preventDefault();
+                alert('Silakan pilih file MKV terlebih dahulu');
+            }
+        });
+    </script>
+</body>
+</html>

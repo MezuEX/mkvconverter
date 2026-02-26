@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Konversi - MKV to MP4</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Status Konversi</h1>
+            <a href="{{ url_for('index') }}" class="back-link">← Kembali</a>
+        </header>
+
+        <div class="status-section">
+            <div id="statusContainer">
+                {% if status.status == 'processing' %}
+                    <div class="status processing">
+                        <div class="status-icon">⏳</div>
+                        <h3>Sedang Mengkonversi...</h3>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ status.progress }}%"></div>
+                        </div>
+                        <p class="progress-text">{{ status.progress|round(1) }}% - {{ status.message }}</p>
+                        <p class="info">Harap tunggu, proses mungkin memakan waktu beberapa menit...</p>
+                    </div>
+                {% elif status.status == 'completed' %}
+                    <div class="status completed">
+                        <div class="status-icon">✅</div>
+                        <h3>Konversi Berhasil!</h3>
+                        <p>File Anda telah berhasil dikonversi ke format MP4.</p>
+                        <a href="{{ url_for('download_file', filename=output_filename) }}" class="download-btn">
+                            📥 Download MP4
+                        </a>
+                    </div>
+                {% elif status.status == 'error' %}
+                    <div class="status error">
+                        <div class="status-icon">❌</div>
+                        <h3>Konversi Gagal</h3>
+                        <p>{{ status.message }}</p>
+                        <a href="{{ url_for('index') }}" class="retry-btn">Coba Lagi</a>
+                    </div>
+                {% else %}
+                    <div class="status unknown">
+                        <div class="status-icon">❓</div>
+                        <h3>Status Tidak Diketahui</h3>
+                        <p>ID pekerjaan tidak valid atau telah kadaluarsa.</p>
+                        <a href="{{ url_for('index') }}" class="retry-btn">Kembali ke Home</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if status.status == 'processing' %}
+    <script>
+        // Auto-refresh progress setiap 2 detik
+        function updateProgress() {
+            fetch('/progress/{{ job_id }}')
+                .then(response => response.json())
+                .then(data => {
+                    const statusContainer = document.getElementById('statusContainer');
+                    
+                    if (data.status === 'processing') {
+                        // Update progress bar
+                        const progressFill = document.querySelector('.progress-fill');
+                        const progressText = document.querySelector('.progress-text');
+                        
+                        if (progressFill) {
+                            progressFill.style.width = data.progress + '%';
+                        }
+                        if (progressText) {
+                            progressText.textContent = data.progress.toFixed(1) + '% - ' + data.message;
+                        }
+                        
+                        // Continue updating
+                        setTimeout(updateProgress, 2000);
+                    } else if (data.status === 'completed' || data.status === 'error') {
+                        // Reload page to show final status
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching progress:', error);
+                    setTimeout(updateProgress, 5000);
+                });
+        }
+
+        // Start progress updates
+        setTimeout(updateProgress, 2000);
+    </script>
+    {% endif %}
+</body>
+</html>
